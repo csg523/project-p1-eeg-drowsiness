@@ -1,7 +1,6 @@
 # Project: Driver Drowsiness Detection System
 
 ## Stakeholder Requirements
-
 Stakeholders require a system that:
 - **Ensures Driver Safety:** Provides timely warnings before cognitive fatigue results in an accident.
 - **Responds to Physiological Events:** Detects shifts in EEG frequency bands within a strictly bounded time.
