@@ -131,7 +131,7 @@ stateDiagram-v2
 * **Exit Actions:** Call Self_Test.
 
 ### Self_Test
-* **Description:** Diagnostic state. Checks if dricers are working correctly.
+* **Description:** Diagnostic state. Checks if drivers are working correctly.
 * **Behavior:** If hardware checks fail, it may retry or trap.
 * **Transitions:** Goes to Idle only if all hardware passes.
 
