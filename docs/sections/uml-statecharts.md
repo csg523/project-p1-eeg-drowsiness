@@ -3,7 +3,7 @@
 
 ### Inside the System
 - Main Controller Logic
-- Driver
+- System Driver
 - Signal Processing
 - Alert Management 
 - Safety Enforcement 
@@ -39,7 +39,7 @@
 ```mermaid
 flowchart LR
     Driver -->|Touch Interaction| STMPE811
-    Driver -->| Date signal | UART
+    Driver -->| Data signal | UART
     STMPE811 -->|I2C Interrupts| Embedded_Monitor
     UART -->|Raw Data Stream| Embedded_Monitor
     Embedded_Monitor -->|Drowsiness detected| Alert_System
@@ -66,32 +66,54 @@ flowchart LR
 #### UC-01: System Startup
 * **Goal:** Initialize the microcontroller.
 * **Trigger:** Power is applied to the system (Switch ON).
-* **Preconditions:** Power supply voltage is within operational range.
-* **Postcondition:** System is in Idle state, waiting for user input.
+* **Main Interaction:** Boot microcontroller → initialize peripherals → run driver tests (EEG module, touch controller STMPE811) → verify system health.
+* **Outcome:** Enters Idle state if self-test passes; otherwise enters Fault if any test fails.
 
 #### UC-02: Start Monitoring
 * **Goal:** Transition the system from standby to active state.
 * **Trigger:** Driver releases contact with the touch sensor.
-* **Preconditions:** System is currently in the Idle state.
-* **Postcondition:** System is in Active state.
+* **Main Interaction:** Detect loss of continuous touch → start EEG sampling → apply data processing and metric computation → enable continuous monitoring loop.
+* **Outcome:** System transitions to Active state and continuously evaluates drowsiness.
 
 #### UC-03: Detect Mild Drowsiness
 * **Goal:** Provide an early warning to the driver before the situation becomes critical.
 * **Trigger:** Calculated EEG drowsiness metric exceeds Threshold 1.
-* **Preconditions:** System is in Active state.
-* **Postcondition:** System is in Mild_Alert state.
+* **Main Interaction:** Compare computed metric with Threshold 1 → update internal state → activate mild alert (Yellow LED, intermittent beep) → log mild drowsiness event.
+* **Outcome:** System enters Mild_Alert state while continuing to monitor EEG.
 
-#### UC-04: Escalation to High Alert
-* **Goal:** Forcefully alert the driver of a dangerous driving condition.
-* **Trigger:** Calculated EEG drowsiness metric exceeds Threshold 2 (Critical).
-* **Preconditions:** System is in Active or Mild_Alert state.
-* **Postcondition:** System is in High_Alert state.
+#### UC-04: Recover From Mild Drowsiness 
+* **Goal:** Return to normal monitoring when driver becomes alert again.  
+* **Trigger:** EEG metric drops below Low Threshold (Threshold 1).  
+* **Main Interaction:** Validate updated metric → deactivate mild alert → update driver state to recovered  
+* **Outcome:**  System returns to Active state.
 
-#### UC-05: Fault Recovery
-* **Goal:** Recover from runtime errors without permanent system failure.
-* **Trigger:** Hardware timeout (I2C/UART) or logical error detected.
-* **Preconditions:** System is in any state (Idle, Active, or Alert).
-* **Postcondition:** System is attempting to return to Idle via the startup sequence.
+
+#### UC-05: Escalation to High Alert
+* **Goal:** Strongly warn the driver of dangerous drowsiness.  
+* **Trigger:** EEG metric exceeds High Threshold (Threshold 2).  
+* **Main Interaction:** Validate critical threshold crossing → activate strong alert (Red LED, continuous loud alarm) → log critical drowsiness event  
+* **Outcome:**  
+System transitions to High_Alert state.
+
+
+#### UC-06: De-escalation from High Alert 
+* **Goal:** Reduce alert level when driver shows improvement.  
+* **Trigger:** EEG metric drops below High Threshold but is still above Mild Threshold.  
+* **Main Interaction:** Reduce alert intensity → update internal drowsiness status → continue monitoring  
+* **Outcome:** System transitions back to Mild_Alert state.
+
+
+#### UC-07: Fault Detection
+* **Goal:** Handle hardware or logical failures safely.  
+* **Trigger:** Error detected (UART failure, sensor malfunction, logic fault).  
+* **Main Interaction:** Stop current processing → isolate faulty module → log error/state  
+* **Outcome:** System enters Fault state.
+
+#### UC-08: Fault Recovery (Fault → Safe → Self_Test)
+* **Goal:** Recover from errors and restore normal system behavior.  
+* **Trigger:** Fault recovery routine completes.  
+* **Main Interaction:** Reset affected subsystems → restore stable configuration → verify sensor interfaces → re-run self-test  
+* **Outcome:** System enters Safe state → transitions to Self_Test → returns to Idle if successful.
 ---
 
 ## UML Statechart (Behavioral Model)
@@ -160,7 +182,7 @@ stateDiagram-v2
 
 ### Fault
 * **Description:** Exception handling state.
-* **Triggers:** Driver error.
+* **Triggers:** Internal hardware/software errors.
 * **Entry Actions:** Log specific error code.
 * **Exit Actions:** Perform "Recovery Complete" cleanup logic.
 
