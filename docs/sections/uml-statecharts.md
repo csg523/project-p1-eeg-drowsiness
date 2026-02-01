@@ -46,6 +46,7 @@ flowchart LR
     Power -->|Power| Embedded_Monitor
 
     Alert_System -->|Audio/Visual Warning| Driver
+```
 ---
 
 ## Selected Use Cases
