@@ -52,11 +52,12 @@ flowchart LR
 ## Selected Use Cases
 
 | ID | Use Case | Actor | Description |
-| **UC-01** | System Startup | System | Power on, run self-diagnostics, and enter Idle mode. |
-| **UC-02** | Start Monitoring | Driver | Release touch screen to transition from Idle to Active monitoring. |
-| **UC-03** | Detect Mild Drowsiness | System | EEG metric exceeds Threshold 1; trigger Mild Alert. |
-| **UC-04** | Escalation to High Alert | System | Drowsiness persists/worsens > Threshold 2; trigger Critical Alert. |
-| **UC-05** | Fault Recovery | System | Detect internal error, neutralize outputs, and attempt self-restart. |
+|---------------|------|-----------------------|
+| UC-01 | System Startup | System | Power on, run self-diagnostics, and enter Idle mode. |
+| UC-02 | Start Monitoring | Driver | Release touch screen to transition from Idle to Active monitoring. |
+| UC-03 | Detect Mild Drowsiness | System | EEG metric exceeds Threshold 1; trigger Mild Alert. |
+| UC-04 | Escalation to High Alert | System | Drowsiness persists/worsens > Threshold 2; trigger Critical Alert. |
+| UC-05 | Fault Recovery | System | Detect internal error, neutralize outputs, and attempt self-restart. |
 ---
 
 ### Use Case Descriptions
