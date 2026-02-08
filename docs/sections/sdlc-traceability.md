@@ -70,7 +70,6 @@ sequenceDiagram
 
     
     PMU->>MCU: Battery < 10%
-    MCU->>MCU: Prioritize Alert Task over BLE
 
 ```
 ---
