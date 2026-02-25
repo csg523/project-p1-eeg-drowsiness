@@ -361,11 +361,20 @@ Manage low-level drivers for data ingestion (UART/BLE) and hardware actuation (B
 
 ## Architectural Risk
 
-### Identified Risk: Computational Jitter & Latency
-The 512-point FFT required for EEG processing (FR-5) is computationally expensive. If the **Signal Processing** module consumes too many CPU cycles, it may cause "jitter" in the **Comms** interrupts, leading to dropped UART bytes or delayed **Alert** responses beyond the safety-critical 500ms limit (FR-7).
+### Identified Risk: Resistive Touchscreen Ghost Inputs & Interrupt Flooding
+The 4-wire resistive touchscreen on the STM32F429I-DISC1 can degrade over prolonged usage, causing unintended “ghost touches” or a permanently asserted press signal.
+If the Touch Interface module generates frequent false interrupts, it may introduce computational jitter in the Signal Processing and Comms tasks. This can result in:
+- UART buffer overruns or dropped bytes
+- Increased interrupt latency during EEG acquisition
+- Unintended state transitions (e.g., false start/stop recording events)
+- Delayed or incorrect Alert triggering
 
+In a safety-critical EEG Drowsiness Detection system, such jitter could compromise timing guarantees (e.g., 500 ms alert constraint), making this a potential reliability and integrity risk.
 ---
 
 ### Mitigation
-- **Prioritized Preemption**: The Alarm Task and Safety Manager are assigned higher execution priority than the Processing task (NFR-T3) to ensure safety alerts are never blocked.
-- **DMA Offloading**: Utilize **Direct Memory Access (DMA)** for UART frames to decouple data movement from CPU execution, ensuring the CPU only touches data when a full window is ready.
+- **Input Validation & Debouncing:** Accept touch events only if pressure and coordinates remain stable for a defined threshold period, filtering out transient ghost signals.
+- **Interrupt Rate Limiting:** Throttle touch interrupts or poll at controlled intervals to prevent ISR flooding.
+- **Priority-Based Scheduling:** Assign higher preemption priority to EEG Sampling, Comms, and Alert tasks so that touch events cannot delay safety-critical execution.
+- **DMA Offloading:** Use DMA for UART transfers to decouple communication from CPU timing, ensuring stable data flow even if touch interrupts occur.
+- **Operational Isolation:** Disable or logically ignore the touchscreen during active EEG acquisition phases if it is not essential to runtime control.
