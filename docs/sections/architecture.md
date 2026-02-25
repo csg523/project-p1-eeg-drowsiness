@@ -368,7 +368,6 @@ If the Touch Interface module generates frequent false interrupts, it may introd
 - Increased interrupt latency during EEG acquisition
 - Unintended state transitions (e.g., false start/stop recording events)
 - Delayed or incorrect Alert triggering
-
 In a safety-critical EEG Drowsiness Detection system, such jitter could compromise timing guarantees (e.g., 500 ms alert constraint), making this a potential reliability and integrity risk.
 ---
 
