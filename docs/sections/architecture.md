@@ -5,7 +5,7 @@ flowchart TD
 
 System["SYSTEM
 Responsibility:
-- Bootstrapping and lifecycle
+- Startup & Lifecycle Management
 - Power-On Self-Test (POST) coordination
 
 Encapsulates:
