@@ -362,7 +362,7 @@ Manage low-level drivers for data ingestion (UART/BLE) and hardware actuation (B
 ## Architectural Risk
 
 ### Identified Risk: Resistive Touchscreen Ghost Inputs & Interrupt Flooding
-The 4-wire resistive touchscreen on the STM32F429I-DISC1 can degrade over prolonged usage, causing unintended “ghost touches” or a permanently asserted press signal.
+The 4-wire resistive touchscreen on the Embedded Hardware(STM32F429I-DISC1) can degrade over prolonged usage, causing unintended “ghost touches” or a permanently asserted press signal.
 If the Touch Interface module generates frequent false interrupts, it may introduce computational jitter in the Signal Processing and Comms tasks. This can result in:
 - UART buffer overruns or dropped bytes
 - Increased interrupt latency during EEG acquisition
