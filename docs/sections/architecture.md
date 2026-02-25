@@ -205,8 +205,8 @@ Safety logic is separated from normal control so that faults can override operat
 | **Manmay Maheshwari** | Supervisor | FSM Management, SD-1 Startup logic, SD-4 Recovery logic. |
 | **Niket Sah** | Safety Manager | Signal integrity (FR-4), Battery Priority (FR-9), SD-3 safety logic. |
 | **Parth Duta** | Processing Engine | FFT Computation (NFR-T1), Alpha/Beta math (FR-5). |
-| **Shubham Mishra** | Drowsiness Monitor | Thresholding logic, Hysteresis, Trend Analysis (FR-6). |
-| **Shubham Mishra** | Comms + AlertMgr | UART/BLE Drivers (FR-1/2), PWM/LED control, Logger implementation. |
+| **Subham Mishra** | Drowsiness Monitor | Thresholding logic, Hysteresis, Trend Analysis (FR-6). |
+| **Subham Mishra** | Comms + AlertMgr | UART/BLE Drivers (FR-1/2), PWM/LED control, Logger implementation. |
 
 ---
 
@@ -290,7 +290,72 @@ Perform mathematical transformations on EEG data to calculate metrics required f
 
 ---
 
-### 7.4 Drowsiness Monitor (Shubham Mishra)
+### 7.4 Drowsiness Monitor (Subham Mishra)
+
+#### Purpose and Responsibilities
+Evaluate metrics against thresholds and manage the persistence logic for escalating alerts.
+
+#### Inputs
+- Alpha/Beta Ratios (from Processing)
+- Signal Variance (from Processing)
+
+#### Outputs
+- Risk Level Events (Mild, High)
+- Escalation notifications to Alert System
+
+#### Internal State
+- **ThresholdTable**
+- **EscalationTimer**: 10-second persistence counter.
+
+#### Initialization / Deinitialization
+- **Init**: Load threshold values from NVM (Non-Volatile Memory).
+- **Reset**: Reset escalation timers and clear trend history.
+
+#### Basic Protection Rules
+- **Hysteresis**: Implement a dead-band to prevent rapid alert toggling (flickering).
+- **Stateless Alerting**: Alert level must be based on current risk, independent of previous history (NFR-U1).
+
+#### Module-Level Tests
+
+| Test ID | Purpose | Stimulus | Expected Outcome |
+|:---|:---|:---|:---|
+| **T-D1** | Threshold Trigger | Ratio > Threshold 1 | Notify Mild_Alert |
+| **T-D2** | Persistence | High Ratio for 11 seconds | Notify High_Alert |
+
+---
+
+### 7.5 Comms & Alert Interface (Subham Mishra)
+
+#### Purpose and Responsibilities
+Manage low-level drivers for data ingestion (UART/BLE) and hardware actuation (Buzzer/LED).
+
+#### Inputs
+- Commands from Supervisor (Alert Level)
+- Telemetry data for logging
+
+#### Outputs
+- PWM signals to Buzzer
+- GPIO signals to LEDs
+- Log strings to UART/NVM
+
+#### Internal State
+- **UART_DMA_Config**
+- **PWM_DutyCycle**
+
+#### Initialization / Deinitialization
+- **Init**: Initialize UART (DMA mode), I2C for touch interface, and PWM timers.
+- **Reset**: Set all PWM duty cycles to 0% and clear DMA pointers.
+
+#### Basic Protection Rules
+- **Non-blocking Logging**: Logger must not stall the control loop.
+- **Input Decoupling**: UART reception must use DMA to prevent data loss during processing (FR-1).
+
+#### Module-Level Tests
+
+| Test ID | Purpose | Stimulus | Expected Outcome |
+|:---|:---|:---|:---|
+| **T-E1** | Alert Latency | High_Alert command | Buzzer active within 200ms |
+| **T-E2** | Frame Reception | Incoming UART stream | DMA buffer filled without CPU load |
 
 ---
 
