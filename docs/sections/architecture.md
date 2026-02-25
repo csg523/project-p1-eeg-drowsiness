@@ -216,8 +216,39 @@ Safety logic is separated from normal control so that faults can override operat
 
 ### 7.1 Supervisor (Manmay Maheshwari)
 
+#### Purpose and Responsibilities
+Maintain the global system state and orchestrate transitions between modes based on driver interaction and system health.
+
+#### Inputs
+- Touch interrupts (STMPE811)
+- Fault events from Safety Manager
+- Initialization status from Drivers
+
+#### Outputs
+- State change notifications to all modules
+- Commands to Signal Processing (Start/Stop)
+
+#### Internal State
+- **CurrentState**: Initializing, Self_Test, Idle, Active, Fault, Safe.
+- **TransitionTable**: Validates path from Idle to Active via touch release.
+
+#### Initialization / Deinitialization
+- **Init**: Execute system_init(), transition to Initializing then Self_Test.
+- **Reset**: Trigger system_reset(), enter Safe state, then re-run Self_Test.
+
+#### Basic Protection Rules
+- Reject transition to Active if POST flags (Power-On Self-Test) are not cleared.
+- Safe state must be reachable from any operational state upon fault detection.
+
+#### Module-Level Tests
+
+| Test ID | Purpose | Stimulus | Expected Outcome |
+|:---|:---|:---|:---|
+| **T-A1** | Startup Sequence | Power Applied | Init → Self_Test → Idle |
+| **T-A2** | Guarded Transition | Start command while Fault active | Transition Rejected |
 
 ---
+
 
 ### 7.2 Safety Manager (Niket Sah)
 
