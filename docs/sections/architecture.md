@@ -364,16 +364,11 @@ Manage low-level drivers for data ingestion (UART/BLE) and hardware actuation (B
 ### Identified Risk: Resistive Touchscreen Ghost Inputs & Interrupt Flooding
 The 4-wire resistive touchscreen on the Embedded Hardware(STM32F429I-DISC1) can degrade over prolonged usage, causing unintended “ghost touches” or a permanently asserted press signal.
 If the Touch Interface module generates frequent false interrupts, it may introduce computational jitter in the Signal Processing and Comms tasks. This can result in:
-- UART buffer overruns or dropped bytes
-- Increased interrupt latency during EEG acquisition
-- Unintended state transitions (e.g., false start/stop recording events)
-- Delayed or incorrect Alert triggering
+- Valuable input regarding drowsiness may suffer overrun
+- System won't generate timely alerts that may result in detrimental consequences
+- Will prevent necessary state transitions
 In a safety-critical EEG Drowsiness Detection system, such jitter could compromise timing guarantees (e.g., 500 ms alert constraint), making this a potential reliability and integrity risk.
 ---
 
 ### Mitigation
-- **Input Validation & Debouncing:** Accept touch events only if pressure and coordinates remain stable for a defined threshold period, filtering out transient ghost signals.
-- **Interrupt Rate Limiting:** Throttle touch interrupts or poll at controlled intervals to prevent ISR flooding.
-- **Priority-Based Scheduling:** Assign higher preemption priority to EEG Sampling, Comms, and Alert tasks so that touch events cannot delay safety-critical execution.
-- **DMA Offloading:** Use DMA for UART transfers to decouple communication from CPU timing, ensuring stable data flow even if touch interrupts occur.
-- **Operational Isolation:** Disable or logically ignore the touchscreen during active EEG acquisition phases if it is not essential to runtime control.
+- **LED integration to touch input:** Use of LED to notify that the resistive touch input is being actively taken and as a consequence the embedded system is not sampling the drowsiness metrics at its usual rate. This aspect is yet to be added to the safety requirements as it occured to us at a very later stage of brainstorming. Appropriate rectifications will be made soon.
